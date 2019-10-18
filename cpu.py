@@ -18,14 +18,18 @@ class CPU:
     def load(self):
         """Load a program into memory."""
         program = []
-        f = open(sys.argv[1], "r")
-        for line in f:
-            li = line.strip()
-            if not li.startswith("#"):
-                if li != '':
-                    curr = line.rstrip()
-                    program.append(int(f'0b{curr.split()[0]}', 2))
-        f.close()
+        if len(sys.argv) > 1:
+            f = open(sys.argv[1], "r")
+            for line in f:
+                li = line.strip()
+                if not li.startswith("#"):
+                    if li != '':
+                        curr = line.rstrip()
+                        program.append(int(f'0b{curr.split()[0]}', 2))
+            f.close()
+        else:
+            print("usage: file.py <filename>", file=sys.stderr)
+            sys.exit(1)
 
         address = 0
 
@@ -56,19 +60,22 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
             self.pc += 3
 
+        def AND(self, op, reg_a, reg_b):
+            a_val = bin(self.reg[reg_a])
+            b_val = bin(self.reg[reg_b])
+            self.reg[reg_a] = a_val & b_val
+            self.pc += 3
+
         algos = {
             162: MUL,
             160: ADD,
             167: CMP,
+            168: AND,
         }
-
-        algos[op](self, op, reg_a, reg_b)
-
-        # if op == "ADD":
-        #     self.reg[reg_a] += self.reg[reg_b]
-        #     self.pc += 3
-        # else:
-        #     raise Exception("Unsupported ALU operation")
+        if op in algos:
+            algos[op](self, op, reg_a, reg_b)
+        else:
+            raise Exception("Unsupported ALU operation")
 
     def trace(self):
         """
