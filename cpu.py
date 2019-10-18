@@ -12,6 +12,7 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.sp = 7
+        self.fl = 6
         self.stack = []
 
     def load(self):
@@ -114,6 +115,33 @@ class CPU:
 
             self.reg[self.sp] += 1
 
+        def CMP(self, op, reg_a, reg_b):
+            result = 0
+            if self.reg[reg_a] == self.reg[reg_b]:
+                result = 1
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                result = 2
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                result = 4
+
+            self.reg[self.fl] = result
+            self.pc += 3
+
+        def JMP(self, op, reg_a, reg_b):
+            self.pc = self.reg[reg_a]
+
+        def JEQ(self, op, reg_a, reg_b):
+            if self.reg[self.fl] == 1:
+                JMP(self, op, reg_a, reg_b)
+            else:
+                self.pc += 2
+
+        def JNE(self, op, reg_a, reg_b):
+            if self.reg[self.fl] != 1:
+                JMP(self, op, reg_a, reg_b)
+            else:
+                self.pc += 2
+
         def exception(self, op, reg_a, reg_b):
             print('no valid Command')
             self.pc += 1
@@ -127,7 +155,11 @@ class CPU:
             70: POP,
             80: CALL,
             17: RET,
-            160: ADD
+            160: ADD,
+            167: CMP,
+            84: JMP,
+            85: JEQ,
+            86: JNE
         }
 
         while running:
