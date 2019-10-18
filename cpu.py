@@ -66,11 +66,31 @@ class CPU:
             self.reg[reg_a] = a_val & b_val
             self.pc += 3
 
+        def OR(self, op, reg_a, reg_b):
+            a_val = bin(self.reg[reg_a])
+            b_val = bin(self.reg[reg_b])
+            self.reg[reg_a] = a_val | b_val
+            self.pc += 3
+
+        def XOR(self, op, reg_a, reg_b):
+            a_val = bin(self.reg[reg_a])
+            b_val = bin(self.reg[reg_b])
+            self.reg[reg_a] = a_val ^ b_val
+            self.pc += 3
+
+        def NOT(self, op, reg_a, reg_b):
+            a_val = bin(self.reg[reg_a])
+            self.reg[reg_a] = ~a_val
+            self.pc += 3
+
         algos = {
             162: MUL,
             160: ADD,
             167: CMP,
             168: AND,
+            169: OR,
+            170: XOR,
+            171: NOT
         }
         if op in algos:
             algos[op](self, op, reg_a, reg_b)
