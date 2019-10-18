@@ -12,7 +12,7 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.sp = 7
-        self.fl = 4
+        self.fl = 6
         self.stack = []
 
     def load(self):
@@ -33,14 +33,42 @@ class CPU:
             self.ram[address] = instruction
             address += 1
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, selfObject, op, reg_a, reg_b):
         """ALU operations."""
 
-        if op == "ADD":
+        def CMP(self, op, reg_a, reg_b):
+            result = 0
+            if self.reg[reg_a] == self.reg[reg_b]:
+                result = 1
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                result = 2
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                result = 4
+
+            self.reg[self.fl] = result
+            self.pc += 3
+
+        def ADD(self, op, reg_a, reg_b):
             self.reg[reg_a] += self.reg[reg_b]
             self.pc += 3
-        else:
-            raise Exception("Unsupported ALU operation")
+
+        def MUL(self, op, reg_a, reg_b):
+            self.reg[reg_a] *= self.reg[reg_b]
+            self.pc += 3
+
+        algos = {
+            162: MUL,
+            160: ADD,
+            167: CMP,
+        }
+
+        algos[op](self, op, reg_a, reg_b)
+
+        # if op == "ADD":
+        #     self.reg[reg_a] += self.reg[reg_b]
+        #     self.pc += 3
+        # else:
+        #     raise Exception("Unsupported ALU operation")
 
     def trace(self):
         """
@@ -83,14 +111,6 @@ class CPU:
             print(self.reg[reg])  # Print contents of that reg
             self.pc += 2
 
-        def MUL(self, op, reg_a, reg_b):
-            self.reg[reg_a] *= self.reg[reg_b]
-            self.pc += 3
-
-        def ADD(self, op, reg_a, reg_b):
-            self.reg[reg_a] += self.reg[reg_b]
-            self.pc += 3
-
         def PUSH(self, op, reg_a, reg_b):
             value = self.reg[reg_a]
             self.reg[self.sp] -= 1
@@ -115,18 +135,6 @@ class CPU:
 
             self.reg[self.sp] += 1
 
-        def CMP(self, op, reg_a, reg_b):
-            result = 0
-            if self.reg[reg_a] == self.reg[reg_b]:
-                result = 1
-            elif self.reg[reg_a] > self.reg[reg_b]:
-                result = 2
-            elif self.reg[reg_a] < self.reg[reg_b]:
-                result = 4
-
-            self.reg[self.fl] = result
-            self.pc += 3
-
         def JMP(self, op, reg_a, reg_b):
             self.pc = self.reg[reg_a]
 
@@ -150,13 +158,11 @@ class CPU:
             1: HLT,
             130: LDI,
             71: PRN,
-            162: MUL,
             69: PUSH,
             70: POP,
             80: CALL,
             17: RET,
-            160: ADD,
-            167: CMP,
+            160: self.alu,
             84: JMP,
             85: JEQ,
             86: JNE
@@ -164,9 +170,12 @@ class CPU:
 
         while running:
             op = self.ram[self.pc]
+            func = op
+            if op > 160:
+                func = 160
             reg_a = self.ram[self.pc + 1]
             reg_b = self.ram[self.pc + 2]
-            instructions[op](self, op, reg_a, reg_b)
+            instructions[func](self, op, reg_a, reg_b)
 
     def ram_read(self, mar):
         return self.ram[mar]
