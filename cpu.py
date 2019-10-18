@@ -12,7 +12,7 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.sp = 7
-        self.fl = 6
+        self.fl = 4
         self.stack = []
 
     def load(self):
